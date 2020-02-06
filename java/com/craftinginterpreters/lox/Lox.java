@@ -10,7 +10,9 @@ import java.util.List;
 
 class Lox {
 
+    private static final Interpreter INTERPRETER = new Interpreter();
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             System.out.println("Usage: jlox script");
@@ -28,6 +30,7 @@ class Lox {
 
         // indicate error
         if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
 
     private static void runPrompt() throws IOException {
@@ -41,6 +44,12 @@ class Lox {
         }
     }
 
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() + 
+            "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
+    }
+
     private static void run(String source) {
         // System.out.println("running");
         Scanner scanner = new Scanner(source);
@@ -51,7 +60,9 @@ class Lox {
 
         if (hadError) return;
 
-        System.out.println(new AstPrinter().print(expression));
+        // System.out.println(new AstPrinter().print(expression));
+
+        INTERPRETER.interpret(expression);
     }
 
     static void error(int line, String message) {
